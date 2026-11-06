@@ -1,61 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Shipped by Jenkins</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIVE on Azure · deboistech mini project</title>
+<style>
+  :root{
+    --bg:#10201a; --panel:#16291f; --line:#2a4a38; --green:#22c55e; --green-dim:#1b6b3d;
+    --text:#e8f5ec; --muted:#93b29f; --amber:#f5b942;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;margin:0}
+  html,body{min-height:100%}
+  body{
+    background:var(--bg); color:var(--text);
+    font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background-image:radial-gradient(circle at 1px 1px,rgba(34,197,94,.08) 1px,transparent 0);
+    background-size:28px 28px;
+    padding:40px 20px 56px;
+  }
+  main{max-width:880px;margin:0 auto}
 
-    <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            display: grid;
-            place-items: center;
-            background: #0b1f17;
-            color: #e8f5ec;
-            font-family: Arial;
-        }
+  /* status line */
+  .status{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .dot{width:12px;height:12px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 2s infinite}
+  @keyframes pulse{70%{box-shadow:0 0 0 12px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+  .status strong{font-size:1.05rem}
+  .status .uptime{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
 
-        .card {
-            padding: 40px 56px;
-            border: 2px solid #2ecc71;
-            border-radius: 20px;
-            text-align: center;
-        }
+  h1{font-size:clamp(2rem,6vw,3.4rem);line-height:1.1;letter-spacing:-.02em;margin:28px 0 12px;max-width:16ch}
+  .lede{color:var(--muted);max-width:52ch}
 
-        .dot {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            background: #2ecc71;
-            border-radius: 50%;
-            animation: p 1s infinite;
-        }
+  /* pipeline */
+  .pipeline{
+    margin:36px 0 20px;padding:28px 24px;background:var(--panel);
+    border:1.5px solid var(--green);border-radius:22px;
+  }
+  .pipe-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px}
+  .pipe-head h2{font-size:1rem;font-weight:600}
+  button{
+    font:inherit;font-size:.9rem;color:var(--text);background:transparent;
+    border:1px solid var(--line);border-radius:999px;padding:6px 16px;cursor:pointer;
+  }
+  button:hover{border-color:var(--green)}
+  button:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+  .stages{display:grid;grid-template-columns:1fr 40px 1fr 40px 1fr;align-items:center}
+  .stage{
+    text-align:center;padding:18px 10px;border:1.5px solid var(--line);border-radius:14px;
+    transition:border-color .4s,background .4s,transform .4s;
+  }
+  .stage b{display:block;font-size:1.05rem}
+  .stage span{display:block;color:var(--muted);font-size:.85rem;margin-top:2px}
+  .stage .state{margin-top:10px;font-size:.8rem;color:var(--muted)}
+  .stage.active{border-color:var(--amber);transform:translateY(-3px)}
+  .stage.active .state{color:var(--amber)}
+  .stage.done{border-color:var(--green);background:rgba(34,197,94,.08)}
+  .stage.done .state{color:var(--green)}
+  .link{height:3px;background:var(--line);border-radius:2px;position:relative;overflow:hidden}
+  .link i{position:absolute;inset:0;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform .9s ease}
+  .link.on i{transform:scaleX(1)}
 
-        @keyframes p {
-            50% {
-                opacity: .2;
-            }
-        }
+  /* log */
+  .log{
+    margin-top:24px;padding:14px 16px;background:#0b1712;border:1px solid var(--line);border-radius:12px;
+    font:.82rem/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#b9d6c4;
+    min-height:9.5em;overflow-x:auto;white-space:pre;
+  }
+  .log .ok{color:var(--green)} .log .t{color:var(--muted)}
 
-        .v {
-            color: #2ecc71;
-            font-size: 28px;
-        }
-    </style>
+  /* details */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:20px}
+  .cell{padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:rgba(22,41,31,.6)}
+  .cell small{color:var(--muted);display:block;font-size:.82rem}
+  .cell p{font-size:1.15rem;font-weight:600;margin-top:2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+  .cell.ver p{color:var(--green);font-size:1.6rem}
+  .cell p.ms.slow{color:var(--amber)}
+
+  footer{margin-top:40px;color:var(--muted);font-size:.9rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+  @media (max-width:640px){
+    .stages{grid-template-columns:1fr;gap:0}
+    .link{width:3px;height:26px;margin:0 auto}
+    .link i{transform:scaleY(0);transform-origin:top}
+    .link.on i{transform:scaleY(1)}
+    .status .uptime{margin-left:0;width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+  }
+</style>
 </head>
-
 <body>
-    <div class="card">
-        <h1>
-            <span class="dot"></span>
-            LIVE on Azure
-        </h1>
+<main>
+  <div class="status" role="status">
+    <span class="dot" aria-hidden="true"></span>
+    <strong>Live on Azure</strong>
+    <span class="uptime">Up for <span id="uptime">0s</span></span>
+  </div>
 
-        <p>Jenkins builds + Docker packs + Azure runs</p>
+  <h1>Jenkins builds. Docker packs. Azure runs.</h1>
+  <p class="lede">This page was built by a Jenkins pipeline, packed into a Docker image and is now served from Azure App Service.</p>
 
-        <p class="v">Version 1</p>
-
-        <p>deboistech mini project</p>
+  <section class="pipeline" aria-label="Deployment pipeline">
+    <div class="pipe-head">
+      <h2>Deployment pipeline</h2>
+      <button id="replay" type="button">Replay</button>
     </div>
+    <div class="stages">
+      <div class="stage" id="s0"><b>Jenkins</b><span>Build and test</span><div class="state">Waiting</div></div>
+      <div class="link" id="l0"><i></i></div>
+      <div class="stage" id="s1"><b>Docker</b><span>Package image</span><div class="state">Waiting</div></div>
+      <div class="link" id="l1"><i></i></div>
+      <div class="stage" id="s2"><b>Azure</b><span>Run web app</span><div class="state">Waiting</div></div>
+    </div>
+    <div class="log" id="log" aria-live="polite"></div>
+  </section>
+
+  <section class="grid" aria-label="Deployment details">
+    <div class="cell ver"><small>Version</small><p id="version">1</p></div>
+    <div class="cell"><small>Build number</small><p id="build">#1</p></div>
+    <div class="cell"><small>Region</small><p id="region">East Asia</p></div>
+    <div class="cell"><small>Response time</small><p class="ms" id="ms">Checking…</p></div>
+    <div class="cell"><small>Your local time</small><p id="clock">–</p></div>
+    <div class="cell"><small>Host</small><p id="host">–</p></div>
+  </section>
+
+  <footer>
+    <span>deboistech mini project</span>
+    <span>Page loaded <span id="loaded">–</span></span>
+  </footer>
+</main>
+
+<script>
+  /* Edit these values from your Jenkinsfile or Dockerfile (for example with sed or build args) */
+  const CONFIG = {
+    version: "1",
+    build: "#1",
+    region: "East Asia",
+    image: "deboistech/web:v1"
+  };
+
+  const $ = id => document.getElementById(id);
+  const started = Date.now();
+
+  $("version").textContent = CONFIG.version;
+  $("build").textContent = CONFIG.build;
+  $("region").textContent = CONFIG.region;
+  $("host").textContent = location.hostname || "localhost";
+  $("loaded").textContent = new Date().toLocaleTimeString();
+
+  /* uptime since page load and local clock */
+  function fmt(s){
+    const h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
+    return (h?h+"h ":"") + (m||h?m+"m ":"") + x + "s";
+  }
+  setInterval(() => {
+    $("uptime").textContent = fmt(Math.floor((Date.now()-started)/1000));
+    $("clock").textContent = new Date().toLocaleTimeString();
+  }, 1000);
+
+  /* live response time check against this same page */
+  async function ping(){
+    const t0 = performance.now();
+    try{
+      await fetch(location.href, {method:"HEAD", cache:"no-store"});
+      const ms = Math.round(performance.now()-t0);
+      $("ms").textContent = ms + " ms";
+      $("ms").classList.toggle("slow", ms > 800);
+    }catch(e){
+      $("ms").textContent = "Unavailable";
+    }
+  }
+  ping(); setInterval(ping, 15000);
+
+  /* pipeline animation */
+  const log = $("log");
+  const steps = [
+    {stage:0, lines:[
+      ["Jenkins","Pulling source from Git"],
+      ["Jenkins","Running build and tests"],
+      ["Jenkins","Build " + CONFIG.build + " passed", true]]},
+    {stage:1, lines:[
+      ["Docker","docker build -t " + CONFIG.image + " ."],
+      ["Docker","Pushing image to registry"],
+      ["Docker","Image ready", true]]},
+    {stage:2, lines:[
+      ["Azure","Pulling " + CONFIG.image],
+      ["Azure","Starting container"],
+      ["Azure","Live in " + CONFIG.region, true]]}
+  ];
+  let run = 0;
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function reset(){
+    log.innerHTML = "";
+    [0,1,2].forEach(i => {
+      const s = $("s"+i); s.className = "stage"; s.querySelector(".state").textContent = "Waiting";
+    });
+    [0,1].forEach(i => $("l"+i).classList.remove("on"));
+  }
+  function addLine(src, msg, ok){
+    const d = document.createElement("div");
+    const time = new Date().toLocaleTimeString([], {hour12:false});
+    d.innerHTML = '<span class="t">' + time + '</span>  ' + src.padEnd(7) + (ok ? '<span class="ok">' + msg + '</span>' : msg);
+    log.appendChild(d);
+  }
+  async function play(){
+    const id = ++run;
+    reset();
+    const d = reduced ? 0 : 1;
+    for(const step of steps){
+      if(id !== run) return;
+      const s = $("s"+step.stage);
+      s.classList.add("active"); s.querySelector(".state").textContent = "Running";
+      for(const [src,msg,ok] of step.lines){
+        await wait(450*d); if(id !== run) return;
+        addLine(src,msg,ok);
+      }
+      await wait(400*d); if(id !== run) return;
+      s.classList.remove("active"); s.classList.add("done"); s.querySelector(".state").textContent = "Done";
+      if(step.stage < 2) $("l"+step.stage).classList.add("on");
+      await wait(300*d);
+    }
+  }
+  $("replay").addEventListener("click", play);
+  play();
+</script>
 </body>
 </html>
