@@ -10,7 +10,7 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = 'azureweb.azurecr.io'
+        REGISTRY = 'webazure.azurecr.io'
         IMAGE    = 'hello-azure'
     }
 
