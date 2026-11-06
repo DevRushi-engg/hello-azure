@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shipped by Jenkins</title>
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: grid;
+            place-items: center;
+            background: #0b1f17;
+            color: #e8f5ec;
+            font-family: Arial;
+        }
+
+        .card {
+            padding: 40px 56px;
+            border: 2px solid #2ecc71;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: p 1s infinite;
+        }
+
+        @keyframes p {
+            50% {
+                opacity: .2;
+            }
+        }
+
+        .v {
+            color: #2ecc71;
+            font-size: 28px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>
+            <span class="dot"></span>
+            LIVE on Azure
+        </h1>
+
+        <p>Jenkins builds + Docker packs + Azure runs</p>
+
+        <p class="v">Version 1</p>
+
+        <p>deboistech mini project</p>
+    </div>
+</body>
+</html>
