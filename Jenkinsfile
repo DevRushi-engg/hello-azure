@@ -12,6 +12,7 @@ pipeline {
     environment {
         REGISTRY = 'webazure.azurecr.io'
         IMAGE    = 'hello-azure'
+        BUILD_NUMBER = 'latest'
     }
 
     stages {
