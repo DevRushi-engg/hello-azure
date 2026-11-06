@@ -10,8 +10,8 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = 'hellojenk123.azurecr.io'
-        IMAGE    = 'hello-jenkins'
+        REGISTRY = 'azureweb.azurecr.io'
+        IMAGE    = 'hello-azure'
     }
 
     stages {
@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(
-                        credentialsId: 'acr-creds',
+                        credentialsId: 'azureweb',
                         usernameVariable: 'U',
                         passwordVariable: 'P'
                     )]) {
