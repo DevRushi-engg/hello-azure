@@ -36,7 +36,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(
-                        credentialsId: 'azureweb',
+                        credentialsId: 'acr-cred',
                         usernameVariable: 'U',
                         passwordVariable: 'P'
                     )]) {
